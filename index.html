@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Solda &amp; Carga</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Escolha do tipo de solda e da garganta para resistir ao carregamento: filete, penetração parcial e total; juntas diretas, grupos em torção, consoles em flexão e perfis soldados, com memorial de cálculo.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ctext y=%22.9em%22 font-size=%2290%22%3E%F0%9F%94%A5%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/portfolio-btn.css">
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <h1>Solda &amp; Carga</h1>
+      <p>Informe o carregamento e veja qual tipo de solda e qual garganta resistem — filete, penetração parcial ou total, em juntas diretas, grupos de cordões em torção, consoles em flexão e perfis soldados, com o memorial de cálculo completo.</p>
+    </div>
+    <div class="tside">
+      <div class="tblock" aria-label="Relações principais">
+        <div><b>Garganta</b>a = 0,707·h</div>
+        <div><b>Tensão</b>τ = f/(n<sub>c</sub>·a)</div>
+        <div><b>Torção</b>f″ = M·r/J<sub>u</sub></div>
+        <div><b>Flexão</b>f<sub>M</sub> = M·c/I<sub>u</sub></div>
+      </div>
+      <div class="seg unid" id="unid" role="group" aria-label="Unidade de força">
+        <button type="button" data-v="kN">kN</button><button type="button" data-v="tf">tf</button>
+      </div>
+      <button id="themeBtn" class="theme-btn" type="button" aria-label="Alternar tema claro/escuro"><span id="themeIcon">☀</span> <span id="themeText">Tela clara</span></button>
+    </div>
+  </header>
+
+  <!-- identificação do documento: vai para o cabeçalho e o rodapé dos relatórios -->
+  <section class="ident" aria-label="Identificação do documento">
+    <div class="fld id-proj"><label for="id_proj">Projeto</label><input id="id_proj" placeholder="ex.: Suporte da bomba B-101"></div>
+    <div class="fld"><label for="id_tag">Tag do documento</label><input id="id_tag" placeholder="ex.: MC-1234-001"></div>
+    <div class="fld id-rev"><label for="id_rev">Revisão</label><input id="id_rev" value="0"></div>
+    <div class="fld"><label for="id_resp">Responsável</label><input id="id_resp" placeholder="nome / CREA"></div>
+    <div class="fld"><label for="id_data">Data</label><input id="id_data" type="date"></div>
+  </section>
+
+  <nav class="gtabs" id="modos" aria-label="Modelo de carregamento">
+    <button class="gbtn" type="button" data-modo="simples">Junta direta</button>
+    <button class="gbtn" type="button" data-modo="torcao">Grupo em torção</button>
+    <button class="gbtn" type="button" data-modo="flexao">Console em flexão</button>
+    <button class="gbtn" type="button" data-modo="perfil">Perfil soldado</button>
+  </nav>
+
+  <div class="fhead">
+    <p class="crumb" id="mcrumb"></p>
+    <h2 id="mtitulo"></h2>
+    <p id="mdesc"></p>
+  </div>
+
+  <div class="layout">
+    <aside class="form" id="form">
+
+      <!-- tipo de solda e eletrodos -->
+      <section class="card" data-modos="simples torcao flexao perfil">
+        <h3>Tipo de solda</h3>
+        <div class="seg" id="tipo" role="group" aria-label="Tipo de solda">
+          <button type="button" data-v="filete">Filete</button>
+          <button type="button" data-v="parcial">Pen. parcial</button>
+          <button type="button" data-v="total">Pen. total</button>
+          <button type="button" data-v="misto">Total + filete</button>
+          <button type="button" data-v="comparar">Comparar</button>
+        </div>
+        <p class="help" id="tipo_help">“Total + filete” é a penetração total com filete de reforço dimensionado, para casos extremos: fadiga ou eletrodo abaixo do metal base. Só na junta em T.</p>
+        <p class="lbl sp">Eletrodos considerados</p>
+        <div class="toggles" id="eletrodos"></div>
+      </section>
+
+      <!-- junta direta -->
+      <section class="card" data-modos="simples">
+        <h3>Junta e carregamento</h3>
+        <div class="fgrid">
+          <div class="fld"><label for="s_junta">Tipo de junta</label><select id="s_junta"></select></div>
+          <div class="fld"><label for="s_L">Comprimento do cordão L</label><div class="un"><input id="s_L" inputmode="decimal" value="200"><span>mm</span></div></div>
+          <div class="fld"><label for="s_P">Força normal ao cordão P</label><div class="un"><input id="s_P" inputmode="decimal" value="200"><span class="uF">kN</span></div></div>
+          <div class="fld"><label for="s_V">Força ao longo do cordão V</label><div class="un"><input id="s_V" inputmode="decimal" value="60"><span class="uF">kN</span></div></div>
+        </div>
+        <p class="help">Na junta em T, P traciona a chapa encostada; na sobreposta e na de topo, puxa uma chapa contra a outra. V corre ao longo do cordão. L é o comprimento de cada cordão; os n<sub>c</sub> cordões (lados) dividem a carga.</p>
+      </section>
+
+      <!-- grupo em torção -->
+      <section class="card" data-modos="torcao">
+        <h3>Padrão dos cordões</h3>
+        <div class="fgrid">
+          <div class="fld"><label for="t_junta">Tipo de junta</label><select id="t_junta"></select></div>
+          <div class="fld"><label for="t_forma">Forma</label><select id="t_forma"><option value="ret">Retangular (lados escolhidos)</option><option value="circ">Circular (tubo)</option></select></div>
+          <div class="fld" data-forma="t ret"><label for="t_b">Largura b (x)</label><div class="un"><input id="t_b" inputmode="decimal" value="150"><span>mm</span></div></div>
+          <div class="fld" data-forma="t ret"><label for="t_d">Altura d (y)</label><div class="un"><input id="t_d" inputmode="decimal" value="200"><span>mm</span></div></div>
+          <div class="fld" data-forma="t circ"><label for="t_D">Diâmetro D</label><div class="un"><input id="t_D" inputmode="decimal" value="150"><span>mm</span></div></div>
+        </div>
+        <p class="lbl sp" data-forma="t ret">Lados soldados</p>
+        <div class="toggles" data-forma="t ret">
+          <label class="tg"><input type="checkbox" id="t_sup" checked> superior</label>
+          <label class="tg"><input type="checkbox" id="t_inf" checked> inferior</label>
+          <label class="tg"><input type="checkbox" id="t_esq" checked> esquerdo</label>
+          <label class="tg"><input type="checkbox" id="t_dir"> direito</label>
+        </div>
+        <h3 class="sp">Carga no plano</h3>
+        <div class="fgrid">
+          <div class="fld"><label for="t_Fx">Força F<sub>x</sub></label><div class="un"><input id="t_Fx" inputmode="decimal" value="0"><span class="uF">kN</span></div></div>
+          <div class="fld"><label for="t_Fy">Força F<sub>y</sub></label><div class="un"><input id="t_Fy" inputmode="decimal" value="-40"><span class="uF">kN</span></div></div>
+          <div class="fld"><label for="t_ax">Posição x da carga</label><div class="un"><input id="t_ax" inputmode="decimal" value="300"><span>mm</span></div></div>
+          <div class="fld"><label for="t_ay">Posição y da carga</label><div class="un"><input id="t_ay" inputmode="decimal" value="0"><span>mm</span></div></div>
+        </div>
+        <p class="help">Coordenadas a partir do centro do retângulo b × d; F<sub>y</sub> negativo aponta para baixo. É o suporte do Shigley §9-4: a carga fora do centroide dos cordões gera cisalhamento primário F/L e secundário M·r/J<sub>u</sub>.</p>
+      </section>
+
+      <!-- console em flexão -->
+      <section class="card" data-modos="flexao">
+        <h3>Cordões na face do apoio</h3>
+        <div class="fgrid">
+          <div class="fld"><label for="f_forma">Forma</label><select id="f_forma"><option value="ret">Retangular (lados escolhidos)</option><option value="circ">Circular (tubo)</option></select></div>
+          <div class="fld" data-forma="f circ"><label for="f_D">Diâmetro D</label><div class="un"><input id="f_D" inputmode="decimal" value="114"><span>mm</span></div></div>
+          <div class="fld" data-forma="f ret"><label for="f_b">Largura b</label><div class="un"><input id="f_b" inputmode="decimal" value="100"><span>mm</span></div></div>
+          <div class="fld" data-forma="f ret"><label for="f_d">Altura d (na direção de F)</label><div class="un"><input id="f_d" inputmode="decimal" value="200"><span>mm</span></div></div>
+        </div>
+        <p class="lbl sp" data-forma="f ret">Lados soldados</p>
+        <div class="toggles" data-forma="f ret">
+          <label class="tg"><input type="checkbox" id="f_sup"> superior</label>
+          <label class="tg"><input type="checkbox" id="f_inf"> inferior</label>
+          <label class="tg"><input type="checkbox" id="f_esq" checked> esquerdo</label>
+          <label class="tg"><input type="checkbox" id="f_dir" checked> direito</label>
+        </div>
+        <h3 class="sp">Carga no console</h3>
+        <div class="fgrid">
+          <div class="fld"><label for="f_F">Força F</label><div class="un"><input id="f_F" inputmode="decimal" value="25"><span class="uF">kN</span></div></div>
+          <div class="fld"><label for="f_e">Braço e</label><div class="un"><input id="f_e" inputmode="decimal" value="250"><span>mm</span></div></div>
+          <div class="fld"><label for="f_N">Normal N (+ tração)</label><div class="un"><input id="f_N" inputmode="decimal" value="0"><span class="uF">kN</span></div></div>
+        </div>
+        <p class="help">Shigley §9-5: a seção dos cordões trabalha como uma viga, f<sub>M</sub> = M·c/I<sub>u</sub>, e o cortante se divide por todo o cordão. Também serve para poste soldado na placa de base: F = força horizontal, e = altura de aplicação.</p>
+      </section>
+
+      <!-- perfil soldado -->
+      <section class="card" data-modos="perfil">
+        <h3>Perfil I soldado</h3>
+        <div class="fgrid">
+          <div class="fld"><label for="p_bf">Largura da mesa b<sub>f</sub></label><div class="un"><input id="p_bf" inputmode="decimal" value="250"><span>mm</span></div></div>
+          <div class="fld"><label for="p_tf">Espessura da mesa t<sub>f</sub></label><div class="un"><input id="p_tf" inputmode="decimal" value="16"><span>mm</span></div></div>
+          <div class="fld"><label for="p_hw">Altura da alma h<sub>w</sub></label><div class="un"><input id="p_hw" inputmode="decimal" value="500"><span>mm</span></div></div>
+          <div class="fld"><label for="p_tw">Espessura da alma t<sub>w</sub></label><div class="un"><input id="p_tw" inputmode="decimal" value="8"><span>mm</span></div></div>
+          <div class="fld"><label for="p_V">Cortante máximo V</label><div class="un"><input id="p_V" inputmode="decimal" value="300"><span class="uF">kN</span></div></div>
+          <div class="fld"><label for="p_Lv">Comprimento da viga</label><div class="un"><input id="p_Lv" inputmode="decimal" value="6000"><span>mm</span></div></div>
+        </div>
+        <label class="tg"><input type="checkbox" id="p_interm"> Cordões intermitentes</label>
+        <div class="fgrid" data-se="p_interm">
+          <div class="fld"><label for="p_trecho">Trecho soldado</label><div class="un"><input id="p_trecho" inputmode="decimal" value="75"><span>mm</span></div></div>
+          <div class="fld"><label for="p_passo">Passo</label><div class="un"><input id="p_passo" inputmode="decimal" value="200"><span>mm</span></div></div>
+        </div>
+        <label class="tg"><input type="checkbox" id="p_conc"> Carga concentrada sobre a mesa (roda, apoio)</label>
+        <div class="fgrid" data-se="p_conc">
+          <div class="fld"><label for="p_Pc">Carga P<sub>c</sub></label><div class="un"><input id="p_Pc" inputmode="decimal" value="100"><span class="uF">kN</span></div></div>
+          <div class="fld"><label for="p_lc">Distribuição ℓ<sub>c</sub></label><div class="un"><input id="p_lc" inputmode="decimal" value="200"><span>mm</span></div></div>
+        </div>
+        <p class="help">Os cordões alma–mesa transmitem o fluxo q = V·Q/I. São dois cordões, um de cada lado da alma; na penetração total a garganta é a espessura da alma.</p>
+      </section>
+
+      <!-- chapas (modelos com chapa) -->
+      <section class="card" data-modos="simples torcao flexao">
+        <h3>Chapas e cordões</h3>
+        <div class="fgrid">
+          <div class="fld"><label for="c_t">Chapa conectada t</label><div class="un"><input id="c_t" inputmode="decimal" value="10"><span>mm</span></div></div>
+          <div class="fld"><label for="c_T">Chapa de apoio</label><div class="un"><input id="c_T" inputmode="decimal" value="12"><span>mm</span></div></div>
+          <div class="fld"><label for="c_lados">Cordões por junta n<sub>c</sub></label><select id="c_lados"><option value="1">1 — um lado</option><option value="2" selected>2 — os dois lados</option></select></div>
+        </div>
+        <p class="help">t é a espessura da peça que chega à junta: é a garganta da penetração total. A chapa mais grossa define o filete mínimo (AWS D1.1). Com n<sub>c</sub> = 2 os dois cordões de uma chapa fina são tratados como uma linha só.</p>
+      </section>
+
+      <section class="card" data-modos="simples torcao flexao perfil">
+        <h3>Material e critério</h3>
+        <div class="fgrid">
+          <div class="fld"><label for="metal">Metal base</label><select id="metal"></select></div>
+          <div class="fld"><label for="prep">Chanfro da pen. parcial</label><select id="prep"></select></div>
+          <div class="fld"><label for="Sy">S<sub>y</sub> do metal base</label><div class="un"><input id="Sy" inputmode="decimal" value="250"><span>MPa</span></div></div>
+          <div class="fld"><label for="Sut">S<sub>ut</sub> do metal base</label><div class="un"><input id="Sut" inputmode="decimal" value="400"><span>MPa</span></div></div>
+          <div class="fld" style="grid-column:1/-1"><label for="criterio">Critério de verificação</label><select id="criterio"></select></div>
+          <div class="fld" id="nReq_fld"><label for="nReq">n exigido</label><input id="nReq" inputmode="decimal" value="2,0"></div>
+        </div>
+        <p class="help" id="crit_help"></p>
+        <label class="tg"><input type="checkbox" id="var"> Carga variável (fadiga)</label>
+        <div class="fgrid" data-se="var">
+          <div class="fld"><label for="R">R = F<sub>min</sub>/F<sub>max</sub></label><input id="R" inputmode="decimal" value="0"></div>
+        </div>
+      </section>
+
+      <details class="card how">
+        <summary>Como o cálculo é feito</summary>
+        <div id="como"></div>
+      </details>
+    </aside>
+
+    <main class="res">
+      <section class="card anim">
+        <div class="ahead">
+          <h3 id="atitulo">Animação</h3>
+          <div class="actl">
+            <button type="button" class="pbtn" id="play" aria-label="Pausar animação">⏸</button>
+            <input type="range" id="sl" min="0" max="1" step="0.01" value="1" aria-label="Fração da carga aplicada">
+            <output id="slo" data-mr-ignore>100 %</output>
+          </div>
+        </div>
+        <svg id="svg" class="fig" data-mr-ignore viewBox="0 0 600 300" role="img" aria-label="Animação do carregamento"></svg>
+        <div class="legend" id="leg"></div>
+      </section>
+
+      <section class="card" id="recCard">
+        <h3>Mais adequado para este carregamento</h3>
+        <div id="rec"></div>
+        <div id="aviso"></div>
+      </section>
+
+      <section class="card" id="matCard">
+        <div class="ahead">
+          <h3>Todas as combinações</h3>
+          <div class="seg sm" id="mtipo" role="group" aria-label="Tipo de solda na tabela"></div>
+        </div>
+        <p class="help">Cada célula mostra o coeficiente de segurança n da verificação que governa (a mais crítica) e, abaixo, qual é ela; n ≥ 1 atende. Linhas: tamanho do cordão; colunas: eletrodo. Clique para ver o memorial.</p>
+        <div class="mxbar">
+          <label class="tg"><input type="checkbox" id="soFreq"> Mostrar só eletrodos e tamanhos de uso frequente</label>
+          <span class="mxleg"><i class="dot"></i>uso frequente · <b class="star">★</b> menor que atende · <b class="dia">◆</b> melhor opção de uso frequente</span>
+        </div>
+        <div class="twrap" id="matriz"></div>
+      </section>
+
+      <section class="card" id="detCard">
+        <div class="ahead">
+          <div><p class="crumb">Solda selecionada</p><h3 id="dtitulo"></h3></div>
+          <div class="rbtns"><button type="button" class="print-btn" id="printBtn">🖨 Relatório PDF</button>
+            <button type="button" class="print-btn alt" id="wordBtn">📄 Relatório Word (.docx)</button></div>
+        </div>
+        <p class="rstat" id="rstat" role="status"></p>
+        <div id="checks"></div>
+        <div class="memorial" id="memorial"></div>
+      </section>
+    </main>
+  </div>
+
+  <footer class="foot">
+    <div><strong>Fontes.</strong> BUDYNAS, R. G.; NISBETT, J. K. <em>Elementos de Máquinas de Shigley</em>, 10ª ed. — cap. 9 (garganta do filete, cisalhamento primário e secundário em torção e flexão, propriedades unitárias das Tab. 9-1 e 9-2, metal de adição Tab. 9-3, tensões admissíveis Tab. 9-4, fadiga e K<sub>fs</sub> Tab. 9-5) e cap. 6 (Marin, Goodman). AISC 360 — garganta efetiva da penetração parcial (Tab. J2.1) e garganta mínima (Tab. J2.3). AWS D1.1 — filete mínimo pela chapa mais grossa e máximo na borda. ABNT NBR 8800, 6.2.5 — resistências de cálculo de soldas de filete e de entalhe.</div>
+    <div>Não verificado aqui: resistência das chapas conectadas fora do cordão (escoamento, rasgamento, colapso de bloco), tensões residuais e distorção, decoesão lamelar em tração na espessura, aumento de resistência do filete transversal (AISC J2.4) e categorias de detalhe em fadiga de alto ciclo (AWS D1.1 parte C / EN 1993-1-9). A penetração parcial e a total exigem procedimento qualificado (EPS/RQP); a total, ensaio volumétrico (UT ou RT). Na penetração total com filete, o filete soma garganta ao metal de solda e reduz o concentrador em fadiga, mas não aumenta a resistência da chapa conectada.</div>
+    <div>“Uso frequente” indica eletrodos E60xx/E70xx (E6013, E7018, ER70S-6), os mais estocados no Brasil, e filetes até 8 mm, que saem em um passe na posição horizontal. É uma orientação, não um dado de catálogo.</div>
+    <div>Ferramenta de pré-dimensionamento. Não substitui a verificação e a ART de um engenheiro responsável.</div>
+  </footer>
+</div>
+
+<div id="printReport" hidden></div>
+
+<script src="js/dados.js"></script>
+<script src="js/calculo.js"></script>
+<script src="js/memorial.js"></script>
+<script src="js/desenho.js"></script>
+<script src="js/relatorio.js"></script>
+<script src="js/app.js"></script>
+
+<!-- === Botao de volta ao portfolio - cole antes de </body> === -->
+<a id="mr-portfolio-btn" href="https://matheusmerlim1.github.io/" target="_blank" rel="noopener"
+   aria-label="Abrir o portf&oacute;lio de Matheus Raposo" title="Ver todos os meus projetos">
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+       stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/>
+  </svg>
+  <span>Portf&oacute;lio</span>
+</a>
+<script src="js/portfolio-btn.js"></script>
+</body>
+</html>
